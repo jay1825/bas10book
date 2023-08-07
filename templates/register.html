@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Bastionbook{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post">
+    <label for="instance_name">Instance Name</label>
+    <input name="instance_name" id="instance_name" required>
+    <label for="user">User</label>
+    <input name="user" id="user" required>
+    <label for="ipaddr">IP Address</label>
+    <input name="ipaddr" id="ipaddr" required>
+    <label for="pvt_key">Private Key</label>
+    <input name="pvt_key" id="pvt_key" required>
+    <input type="submit" value="Add">
+  </form>
+  <p1>
+    {% for message in get_flashed_messages() %}
+      {% if bad_entry %}
+      <div style="color:red;">{{ message }}</div>
+      {% else %}
+      <div style="color:green;">{{ message }}</div>
+      {% endif %}
+    {% endfor %}
+  </p1>
+{% endblock %}
