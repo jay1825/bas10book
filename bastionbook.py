@@ -7,23 +7,48 @@ import re
 import requests
 # import boto3
 
+ 
+
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
 
+ 
+
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!!!@!!!</p>"
+    return "<p>Hello, World!!!!@@@!!</p>"
+
+ 
 
 #for passing inputs through extensions
 #the decorator argument and the function argument
 # have to match.
 @app.route("/<name>")
 def hello_name(name):
-    return f"<h1>Hello, {escape(name)}!</h2>"
+    return f"<h1>Hello, {escape(name)}!</h1>"
+
+ 
 
 @app.route("/register", methods=('GET','POST'))
 def register():
+
+ 
+
+    #if request is GET
+    url = 'https://8bue09wn9h.execute-api.us-west-2.amazonaws.com/test/dynamodbmanager'
+
+ 
+
+    get_all_data = {
+    'operation': 'getall'
+    }
+
+    response_data = requests.post(
+        url,
+        data=json.dumps(get_all_data),
+        headers={'Accept': 'application/json'}
+    )
     if request.method == 'POST':
         try:
             inst_name = request.form['instance_name']
@@ -31,7 +56,7 @@ def register():
             ipaddr = request.form['ipaddr']
             pvt_key= request.form['pvt_key']
             operation = 'create'
-            
+
             #below are a few chained assertion statements to disallow any input misformat
             assert isinstance(user, str) and \
             "" not in (inst_name, user, ipaddr, pvt_key) and \
@@ -39,10 +64,13 @@ def register():
             bool(re.search(r'^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$', ipaddr)) and \
             isinstance(pvt_key, str)
 
+ 
+
             print((inst_name, user, ipaddr, pvt_key))
 
+ 
+
             try:
-                url = 'https://mygq8yd0jg.execute-api.us-west-2.amazonaws.com/test/dynamodbmanager'
                 new_entry = {
                     'operation': str(operation),
                     'payload': {
@@ -60,17 +88,21 @@ def register():
                     )
                 assert response.content.decode() == 'null'
                 flash('entry successful')
-                return render_template('register.html', bad_entry=False)
+                return render_template('register.html', bad_entry=False, instance_data=response_data.json())
             except:
                 flash('entry unsuccessful, internal error.')
-                return render_template('register.html', bad_entry=True)
-        
+                return render_template('register.html', bad_entry=True, instance_data=response_data.json())
+
         except:
             flash('entry unsuccessful, try again.')
-            return render_template('register.html', bad_entry=True)
-                
-            
-    return render_template('register.html')
+            return render_template('register.html', bad_entry=True, instance_data=response_data.json())
+
+
+    return render_template('register.html', instance_data=response_data.json())
+
+ 
+
+ 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
